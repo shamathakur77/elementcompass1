@@ -18,7 +18,7 @@
     --paper-deep: #e4d8c0;
     --gold: #c9a84c;
     --gold-soft: #d9bd6a;
-    --gold-deep: #a8893a;
+    --gold-deep: #806524;
     --rust: #b85c38;
     --teal: #3a7d74;
     --muted: #5a5246;
@@ -74,8 +74,8 @@
   /* Sound toggle - floating, top right */
   .sound-toggle {
     position: fixed;
-    top: 32px;
-    right: 100px;
+    top: 20px;
+    right: 96px;
     width: 44px;
     height: 44px;
     background: var(--paper-warm);
@@ -100,6 +100,14 @@
     border-color: var(--gold);
   }
   .sound-toggle svg { width: 18px; height: 18px; }
+
+  .sound-toggle.hinting {
+    animation: hint-pulse 1.6s ease infinite;
+  }
+  @keyframes hint-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.6); }
+    50% { box-shadow: 0 0 0 12px rgba(201,168,76,0); }
+  }
 
   .container {
     max-width: 920px;
@@ -872,6 +880,107 @@
     color: var(--ink);
   }
 
+  /* Waitlist form */
+  .waitlist-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 400px;
+    margin: 24px auto 16px;
+  }
+  @media (min-width: 540px) {
+    .waitlist-form { flex-direction: row; }
+  }
+  .waitlist-form input {
+    flex: 1;
+    padding: 14px 16px;
+    background: var(--paper);
+    border: 1px solid var(--line-strong);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    color: var(--ink);
+  }
+  .waitlist-form input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+  }
+  .waitlist-btn {
+    padding: 14px 24px;
+    background: var(--ink);
+    color: var(--paper);
+    border: 1px solid var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+  .waitlist-btn:hover {
+    background: var(--gold);
+    color: var(--ink);
+    border-color: var(--gold);
+  }
+  .waitlist-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-top: 12px;
+    text-align: center;
+  }
+  .waitlist-form.success input,
+  .waitlist-form.success button { display: none; }
+
+  /* Privacy section */
+  .privacy {
+    margin-top: 48px;
+    padding: 36px 32px;
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
+    position: relative;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .privacy::before {
+    content: "";
+    position: absolute;
+    top: 10px; left: 10px; right: 10px; bottom: 10px;
+    border: 1px solid var(--gold);
+    opacity: 0.25;
+    pointer-events: none;
+  }
+  .privacy h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-style: italic;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .privacy h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin: 16px 0 6px;
+  }
+  .privacy p, .privacy li {
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .privacy ul {
+    padding-left: 20px;
+    margin-bottom: 8px;
+  }
+  .privacy a {
+    color: var(--gold-deep);
+    text-decoration: underline;
+  }
+
   /* === FOOTER === */
   .footer {
     margin-top: 64px;
@@ -983,6 +1092,24 @@
     h1 { font-size: 72px; }
     .container { padding: 100px 32px 100px; }
   }
+
+  /* ACCESSIBILITY: honor reduced-motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    .compass-svg .ring { animation: none; }
+    .loading-mark { animation: none; opacity: 1; }
+    .signature::after { animation: none; }
+    /* Strokes still draw but instantly */
+    .signature-mark-svg.animating .stroke {
+      stroke-dasharray: 0;
+      stroke-dashoffset: 0;
+    }
+  }
 </style>
 </head>
 <body>
@@ -1016,12 +1143,12 @@
     <div class="input-grid">
       <div class="field">
         <label for="name">Your Name</label>
-        <input type="text" id="name" placeholder="Your full name">
+        <input type="text" id="name" placeholder="Your full name" autocomplete="name" autocapitalize="words">
       </div>
 
       <div class="field">
         <label for="date">Birth Date</label>
-        <input type="date" id="date" min="1900-01-01" max="2099-12-31">
+        <input type="date" id="date" min="1900-01-01" max="2099-12-31" autocomplete="bday">
       </div>
 
       <div class="field">
@@ -1034,7 +1161,7 @@
         <label for="timezone">Birth Timezone</label>
         <select id="timezone">
           <option value="5.5">India · UTC+5:30</option>
-          <option value="1" selected>Sweden CET · UTC+1</option>
+          <option value="1">Sweden CET · UTC+1</option>
           <option value="2">Sweden Summer · UTC+2</option>
           <option value="0">UK · UTC+0</option>
           <option value="-5">US Eastern · UTC-5</option>
@@ -1042,6 +1169,11 @@
           <option value="8">China · UTC+8</option>
           <option value="9">Japan · UTC+9</option>
           <option value="-3">Brazil · UTC-3</option>
+          <option value="10">Sydney · UTC+10</option>
+          <option value="4">Dubai · UTC+4</option>
+          <option value="-4">Atlantic · UTC-4</option>
+          <option value="-6">US Central · UTC-6</option>
+          <option value="-7">US Mountain · UTC-7</option>
         </select>
       </div>
 
@@ -1077,6 +1209,9 @@
     </div>
 
     <button class="btn" id="calculate"><span>Generate My Reading</span></button>
+    <p style="text-align: center; margin-top: 12px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--muted);">
+      ◆ NO SIGNUP · NO COOKIES · YOUR DATA NEVER LEAVES YOUR DEVICE
+    </p>
     <div class="error" id="error" style="display:none"></div>
   </section>
 
@@ -1088,12 +1223,44 @@
 
   <section class="reading" id="reading"></section>
 
+  <section class="privacy" id="privacy">
+    <h3>Privacy & Your Data</h3>
+    <p>This page was built to be respectful with your information from the ground up.</p>
+
+    <h4>What gets processed</h4>
+    <p>Your birth date, time, name (optional), gender, and timezone. All calculation happens in your browser using JavaScript. None of these inputs are transmitted to any server, stored in any database, or logged anywhere.</p>
+
+    <h4>No cookies, no tracking</h4>
+    <p>This site does not set any cookies. There is no analytics tracking, no advertising pixel, no fingerprinting, and no session persistence. Close the tab and your reading is gone unless you saved the image manually.</p>
+
+    <h4>Third-party resources we load</h4>
+    <p>To render properly, your browser loads fonts and one helper library from external CDNs:</p>
+    <ul>
+      <li><strong>Google Fonts</strong> (Cormorant Garamond, DM Mono, Noto Serif SC) — Google may receive your IP address and User-Agent when fonts are loaded. We use only fonts, no Google Analytics or tracking.</li>
+      <li><strong>cdnjs.cloudflare.com</strong> — loads the html2canvas library used when you click "Share this" to generate your soul signature image. Cloudflare may receive your IP for this request.</li>
+    </ul>
+    <p>If you join the optional waitlist below, your email goes to a private Substack list managed under Substack's <a href="https://substack.com/privacy" target="_blank" rel="noopener">privacy policy</a>. Nothing else.</p>
+
+    <h4>Legal basis</h4>
+    <p>Under GDPR, processing your birth details in your own browser to generate a reading you requested is performed on the basis of your direct consent (Art. 6(1)(a)), given by filling in the form. Since no data leaves your device, the question of cross-border transfer doesn't arise.</p>
+
+    <h4>Your rights</h4>
+    <p>You have the right to access, rectify, or erase any data we hold about you. Since we don't hold any, this is automatic for the calculator. For the waitlist, write to <a href="mailto:hello@shamathakur.carrd.co">hello@shamathakur.carrd.co</a> and your email will be removed.</p>
+
+    <h4>Operator</h4>
+    <p>This project is run as a personal creative endeavour by Shama Thakur, Stockholm, Sweden. Not a registered company. For questions, reach out via <a href="https://shamathakur.carrd.co" target="_blank" rel="noopener">my site</a>.</p>
+
+    <h4>Disclaimer</h4>
+    <p>Bazi is a 1,200-year-old Chinese metaphysical system. This reading is offered for reflection and entertainment, not as medical, financial, psychological, or legal advice. Take what resonates, leave what doesn't.</p>
+  </section>
+
   <footer class="footer">
     Element Compass · A reading by Shama Thakur · Built with care<br>
     Your data is processed in-browser. Nothing leaves your device.<br><br>
     <a href="https://shamathakur.carrd.co" target="_blank">Site</a> ·
     <a href="https://substack.com/@shamathakur" target="_blank">Substack</a> ·
-    <a href="https://ko-fi.com/shamathakur" target="_blank">Support the work</a><br>
+    <a href="https://ko-fi.com/shamathakur" target="_blank">Support the work</a> ·
+    <a href="#privacy">Privacy</a><br>
     @SHAMA_THAKUR77
   </footer>
 
@@ -1115,119 +1282,245 @@
 
 <script>
 // ============================================================
-// AMBIENT SOUND - Tibetan singing bowl drone via Web Audio API
+// AMBIENT SOUND SYSTEM
+// Calm-deepening, not stimulating. Designed for parasympathetic
+// nervous system activation (real ASMR effect, not "energy boost").
+// All synthesized live via Web Audio API — no audio files.
 // ============================================================
 let audioCtx = null;
 let soundOn = false;
 let soundNodes = [];
+let chimeInterval = null;
+let masterOut = null;
+let reverbNode = null;
 
 function initAudio() {
   if (audioCtx) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  // Create the master output and reverb once
+  masterOut = audioCtx.createGain();
+  masterOut.gain.value = 1;
+  masterOut.connect(audioCtx.destination);
+
+  // Shared reverb (long, cathedral-like for spaciousness)
+  reverbNode = audioCtx.createConvolver();
+  const impulseLen = audioCtx.sampleRate * 5;
+  const impulse = audioCtx.createBuffer(2, impulseLen, audioCtx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const data = impulse.getChannelData(ch);
+    for (let i = 0; i < impulseLen; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / impulseLen, 1.8);
+    }
+  }
+  reverbNode.buffer = impulse;
+  const reverbGain = audioCtx.createGain();
+  reverbGain.gain.value = 0.5;
+  reverbNode.connect(reverbGain);
+  reverbGain.connect(masterOut);
 }
 
 function startBowl() {
   initAudio();
   if (audioCtx.state === 'suspended') audioCtx.resume();
 
-  // Multiple oscillators tuned to a low Tibetan bowl harmonic series (F2 fundamental ~87Hz)
+  // Tibetan bowl tuned to a relaxing fundamental (~F2 ~87Hz)
+  // Inharmonic ratios mimic real bowl partials
   const fundamental = 87.31;
-  const harmonics = [1, 2.61, 4.83, 7.39]; // Bowl-like inharmonic ratios
-  const gains = [0.06, 0.04, 0.025, 0.015];
+  const harmonics = [1, 2.61, 4.83, 7.39, 10.91];
+  const gains = [0.05, 0.035, 0.022, 0.013, 0.006];
 
   const masterGain = audioCtx.createGain();
   masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
-  masterGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 3); // Slow fade in
+  masterGain.gain.linearRampToValueAtTime(0.7, audioCtx.currentTime + 4); // slow swell
 
-  // Reverb-ish via convolver with synthesized impulse
-  const convolver = audioCtx.createConvolver();
-  const impulseLen = audioCtx.sampleRate * 4;
-  const impulse = audioCtx.createBuffer(2, impulseLen, audioCtx.sampleRate);
-  for (let ch = 0; ch < 2; ch++) {
-    const data = impulse.getChannelData(ch);
-    for (let i = 0; i < impulseLen; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / impulseLen, 2);
-    }
-  }
-  convolver.buffer = impulse;
-
-  // Create oscillators
   harmonics.forEach((mult, idx) => {
     const osc = audioCtx.createOscillator();
     osc.type = 'sine';
     osc.frequency.value = fundamental * mult;
 
-    // Slow LFO for shimmer
+    // LFO for slow shimmer (each partial breathes at different rate)
     const lfo = audioCtx.createOscillator();
     const lfoGain = audioCtx.createGain();
-    lfo.frequency.value = 0.1 + idx * 0.07;
-    lfoGain.gain.value = mult * 0.3;
+    lfo.frequency.value = 0.08 + idx * 0.06;
+    lfoGain.gain.value = mult * 0.25;
     lfo.connect(lfoGain);
     lfoGain.connect(osc.frequency);
     lfo.start();
 
+    // Each partial gets its own slow amplitude breathing
+    const ampLfo = audioCtx.createOscillator();
+    const ampLfoGain = audioCtx.createGain();
+    ampLfo.frequency.value = 0.05 + idx * 0.03;
+    ampLfoGain.gain.value = gains[idx] * 0.3;
+    ampLfo.connect(ampLfoGain);
+
     const oscGain = audioCtx.createGain();
     oscGain.gain.value = gains[idx];
+    ampLfoGain.connect(oscGain.gain);
+    ampLfo.start();
 
     osc.connect(oscGain);
     oscGain.connect(masterGain);
     osc.start();
 
-    soundNodes.push(osc, lfo, oscGain, lfoGain);
+    soundNodes.push(osc, lfo, oscGain, lfoGain, ampLfo, ampLfoGain);
   });
 
-  masterGain.connect(convolver);
-  convolver.connect(audioCtx.destination);
-
-  // Also direct (drier) signal
+  // Send to reverb AND dry path
+  masterGain.connect(reverbNode);
   const dryGain = audioCtx.createGain();
-  dryGain.gain.value = 0.5;
+  dryGain.gain.value = 0.6;
   masterGain.connect(dryGain);
-  dryGain.connect(audioCtx.destination);
+  dryGain.connect(masterOut);
 
-  soundNodes.push(masterGain, convolver, dryGain);
+  soundNodes.push(masterGain, dryGain);
+
+  // Start wind chimes — randomized, sparse pentatonic
+  startWindChimes();
 }
 
 function stopBowl() {
   if (!audioCtx) return;
-  soundNodes.forEach(n => {
-    try {
-      if (n.stop) n.stop();
-      n.disconnect();
-    } catch(e) {}
-  });
-  soundNodes = [];
+  // Fade everything out gracefully
+  if (masterOut) {
+    masterOut.gain.cancelScheduledValues(audioCtx.currentTime);
+    masterOut.gain.setValueAtTime(masterOut.gain.value, audioCtx.currentTime);
+    masterOut.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
+  }
+  if (chimeInterval) {
+    clearTimeout(chimeInterval);
+    chimeInterval = null;
+  }
+  setTimeout(() => {
+    soundNodes.forEach(n => {
+      try { if (n.stop) n.stop(); n.disconnect(); } catch(e) {}
+    });
+    soundNodes = [];
+    // Reset master for next time
+    if (masterOut) masterOut.gain.value = 1;
+  }, 1600);
 }
 
-// Single ink-brush stroke sound when calligraphy draws
-function playBrushSound() {
-  if (!soundOn || !audioCtx) return;
-  const dur = 0.4;
+// Pentatonic chime — soft, sparse, randomized
+// Uses a relaxing scale: C major pentatonic (C, D, E, G, A) in higher octaves
+const PENTATONIC = [523.25, 587.33, 659.25, 783.99, 880.00,
+                    1046.50, 1174.66, 1318.51, 1567.98, 1760.00];
+
+function playChimeNote(freq, vel = 0.04) {
+  if (!audioCtx) return;
   const now = audioCtx.currentTime;
 
-  // Noise burst with bandpass for "shhhh" of brush
+  // Bell-like with FM synthesis: carrier + modulator
+  const carrier = audioCtx.createOscillator();
+  const modulator = audioCtx.createOscillator();
+  const modGain = audioCtx.createGain();
+
+  carrier.frequency.value = freq;
+  modulator.frequency.value = freq * 1.4; // inharmonic mod for metallic sheen
+  modGain.gain.value = freq * 0.8;
+  modulator.connect(modGain);
+  modGain.connect(carrier.frequency);
+
+  const envelope = audioCtx.createGain();
+  envelope.gain.setValueAtTime(0, now);
+  envelope.gain.linearRampToValueAtTime(vel, now + 0.005);
+  envelope.gain.exponentialRampToValueAtTime(0.001, now + 2.8);
+
+  // Lowpass for warmth
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 3000;
+  filter.Q.value = 0.5;
+
+  carrier.connect(envelope);
+  envelope.connect(filter);
+  filter.connect(reverbNode);
+
+  // A small dry signal too
+  const dry = audioCtx.createGain();
+  dry.gain.value = 0.2;
+  filter.connect(dry);
+  dry.connect(masterOut);
+
+  carrier.start(now);
+  modulator.start(now);
+  carrier.stop(now + 3);
+  modulator.stop(now + 3);
+}
+
+function startWindChimes() {
+  function scheduleNext() {
+    if (!soundOn) return;
+    // Random delay 6-15 seconds between chimes
+    const delay = 6000 + Math.random() * 9000;
+    chimeInterval = setTimeout(() => {
+      if (!soundOn) return;
+      // Sometimes single note, sometimes a soft cluster
+      const isCluster = Math.random() < 0.3;
+      const count = isCluster ? 2 + Math.floor(Math.random() * 2) : 1;
+      for (let i = 0; i < count; i++) {
+        const freq = PENTATONIC[Math.floor(Math.random() * PENTATONIC.length)];
+        const vel = 0.025 + Math.random() * 0.025;
+        setTimeout(() => playChimeNote(freq, vel), i * (200 + Math.random() * 400));
+      }
+      scheduleNext();
+    }, delay);
+  }
+  scheduleNext();
+}
+
+// Resolution bell — plays when calligraphy completes
+function playResolutionBell() {
+  if (!soundOn || !audioCtx) return;
+  // A perfect fifth resolution: low note + fifth up
+  setTimeout(() => playChimeNote(261.63, 0.08), 0);    // C4
+  setTimeout(() => playChimeNote(392.00, 0.06), 180);  // G4
+  setTimeout(() => playChimeNote(523.25, 0.04), 360);  // C5
+}
+
+// Brush stroke sound (existing, slightly improved)
+function playBrushSound() {
+  if (!soundOn || !audioCtx) return;
+  const dur = 0.5;
+  const now = audioCtx.currentTime;
   const bufferSize = audioCtx.sampleRate * dur;
   const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
   const data = buffer.getChannelData(0);
   for (let i = 0; i < bufferSize; i++) {
-    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+    // Pink-ish noise with envelope
+    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
   }
   const noise = audioCtx.createBufferSource();
   noise.buffer = buffer;
-
   const bp = audioCtx.createBiquadFilter();
   bp.type = 'bandpass';
-  bp.frequency.value = 2000;
-  bp.Q.value = 1.5;
-
+  bp.frequency.value = 2200;
+  bp.Q.value = 1.8;
   const g = audioCtx.createGain();
-  g.gain.setValueAtTime(0.15, now);
+  g.gain.setValueAtTime(0.12, now);
   g.gain.exponentialRampToValueAtTime(0.001, now + dur);
-
   noise.connect(bp);
   bp.connect(g);
-  g.connect(audioCtx.destination);
+  g.connect(masterOut);
   noise.start(now);
+}
+
+// Subtle UI tick — for tapping area selectors etc.
+function playUITick() {
+  if (!soundOn || !audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.value = 2400;
+  const env = audioCtx.createGain();
+  env.gain.setValueAtTime(0, now);
+  env.gain.linearRampToValueAtTime(0.015, now + 0.003);
+  env.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+  osc.connect(env);
+  env.connect(masterOut);
+  osc.start(now);
+  osc.stop(now + 0.1);
 }
 
 document.getElementById('sound-toggle').addEventListener('click', function() {
@@ -1235,7 +1528,7 @@ document.getElementById('sound-toggle').addEventListener('click', function() {
   this.classList.toggle('on', soundOn);
   if (soundOn) {
     startBowl();
-    showToast('Ambient sound on');
+    showToast('Ambient sound on · take a breath');
   } else {
     stopBowl();
     showToast('Sound off');
@@ -1523,6 +1816,44 @@ const STROKE_PATHS = {
 };
 
 // ============================================================
+// AUTO-DETECT TIMEZONE on page load
+// ============================================================
+(function autoSelectTimezone() {
+  try {
+    // Get user's current UTC offset in hours (negative on west, positive on east)
+    const offset = -new Date().getTimezoneOffset() / 60;
+    const select = document.getElementById('timezone');
+    if (!select) return;
+    // Find option closest to user's offset
+    const options = Array.from(select.options);
+    let best = options[0], bestDiff = Infinity;
+    for (const opt of options) {
+      const v = parseFloat(opt.value);
+      const diff = Math.abs(v - offset);
+      if (diff < bestDiff) { bestDiff = diff; best = opt; }
+    }
+    select.value = best.value;
+  } catch (e) { /* silently keep default */ }
+})();
+
+// ============================================================
+// ONE-TIME SOUND DISCOVERY HINT
+// ============================================================
+(function soundHint() {
+  try {
+    if (sessionStorage.getItem('soundHintSeen')) return;
+  } catch(e) { return; }
+  setTimeout(() => {
+    const toggle = document.getElementById('sound-toggle');
+    if (!toggle) return;
+    toggle.classList.add('hinting');
+    showToast('Try the ambient sound · top right ◐');
+    try { sessionStorage.setItem('soundHintSeen', '1'); } catch(e) {}
+    setTimeout(() => toggle.classList.remove('hinting'), 6000);
+  }, 3500);
+})();
+
+// ============================================================
 // AREA SELECTOR
 // ============================================================
 let selectedArea = 'energy';
@@ -1531,6 +1862,7 @@ document.querySelectorAll('.area-option').forEach(el => {
     document.querySelectorAll('.area-option').forEach(e => e.classList.remove('selected'));
     el.classList.add('selected');
     selectedArea = el.dataset.area;
+    playUITick();
   });
 });
 
@@ -1600,6 +1932,9 @@ function animateCalligraphy(chart) {
       strokes.forEach((_, i) => {
         setTimeout(playBrushSound, 200 + i * 1000);
       });
+      // Resolution bell after strokes complete
+      const totalDuration = 200 + strokes.length * 1000 + 600;
+      setTimeout(playResolutionBell, totalDuration);
     }
   }, 400);
 }
@@ -1770,19 +2105,14 @@ function renderReading(chart, name, birth) {
     </section>
 
     <section class="paywall reveal">
-      <p class="paywall-badge">★ Unlock Full Reading</p>
-      <h3>Your Complete Soul Profile</h3>
-      <p class="desc">Everything above is the surface. Your full Bazi, layered with Human Design and numerology, in one personal PDF.</p>
-      <ul class="paywall-features">
-        <li>Your full 4-pillar chart with all 10 Ten Gods in plain language</li>
-        <li>Your current 10-year Luck Pillar and what it's asking of you</li>
-        <li>Career direction map: 3 specific roles you're built for</li>
-        <li>Compatibility layer for partner, business, or co-parent</li>
-        <li>Personalized monthly energy forecast for the next 12 months</li>
-        <li>A beautiful, printable 24-page PDF</li>
-      </ul>
-      <div class="paywall-price">€29 <small>· one-time · arrives in 24h</small></div>
-      <a href="#" class="paywall-btn">Get My Full Profile</a>
+      <p class="paywall-badge">★ In the Making</p>
+      <h3>Want a deeper reading?</h3>
+      <p class="desc">I'm building a longer-form Soul Profile that layers your Bazi with Human Design and numerology. Add your name to hear when it's ready — no spam, just one note when it launches.</p>
+      <form class="waitlist-form" id="waitlist-form" onsubmit="return joinWaitlist(event)">
+        <input type="email" id="waitlist-email" placeholder="your@email.com" required aria-label="Email address">
+        <button type="submit" class="waitlist-btn">Add me to the list</button>
+      </form>
+      <p class="waitlist-note">Your email goes to my private Substack list. You can unsubscribe anytime. No third-party sharing.</p>
     </section>
   `;
 
@@ -1840,6 +2170,29 @@ document.getElementById('share-modal').addEventListener('click', (e) => {
     document.getElementById('share-modal').classList.remove('visible');
   }
 });
+
+// ============================================================
+// WAITLIST - opens Substack subscribe with email
+// Honest implementation: no fake backend, real Substack subscribe
+// ============================================================
+function joinWaitlist(e) {
+  e.preventDefault();
+  const email = document.getElementById('waitlist-email').value.trim();
+  if (!email) return false;
+
+  // Open Substack subscribe with email prefilled
+  // Substack handles GDPR consent on their end
+  const url = 'https://shamathakur.substack.com/subscribe?email=' + encodeURIComponent(email);
+  window.open(url, '_blank', 'noopener');
+
+  // Show confirmation in form
+  const form = document.getElementById('waitlist-form');
+  form.classList.add('success');
+  const note = form.parentElement.querySelector('.waitlist-note');
+  note.innerHTML = '<strong style="color: var(--gold-deep);">✓ Almost done.</strong> Finish confirming on the Substack page that just opened.';
+  showToast('Opening Substack…');
+  return false;
+}
 
 </script>
 </body>
